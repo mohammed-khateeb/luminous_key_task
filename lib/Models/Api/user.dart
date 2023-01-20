@@ -27,6 +27,7 @@ class User {
     data['name'] = firstName;
     data['email'] = email;
     data['id'] = id;
+    data['mobile_number'] = mobileNumber;
 
     return data;
   }

@@ -20,8 +20,18 @@ class AuthServices {
 
   Database? _db;
 
+  Future<Database?> get db async{
+    if(_db==null){
+      _db = await init();
+      return _db;
+    }
+    else{
+      return _db;
+    }
+  }
+
   // this opens the database (and creates it if it doesn't exist)
-  Future<void> init() async {
+   init() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, _databaseName);
     _db = await openDatabase(
@@ -29,6 +39,7 @@ class AuthServices {
       version: _databaseVersion,
       onCreate: _onCreate,
     );
+    return _db;
   }
 
   // SQL code to create the database table
@@ -45,20 +56,21 @@ class AuthServices {
   }
 
   Future<User?> signUp(User user) async {
-    await init();
-    final result = await _db!.query(table,
+    Database? database = await db;
+
+    final result = await database!.query(table,
         where: "$columnEmail = ?",
         whereArgs: [user.email],
         limit: 1);
     if(result.isNotEmpty)return null;
-    int userId = await _db!.insert(table, user.toJson());
+    int userId = await database.insert(table, user.toJson());
     user.id = userId;
     return user;
   }
 
   Future<User?> login(String email,String password)async{
-      await init();
-      final result = await _db!.query(table,
+    Database? database = await db;
+      final result = await database!.query(table,
           where: "$columnEmail = ?  AND $columnPassword = ?",
           whereArgs: [email, password],
           limit: 1);
